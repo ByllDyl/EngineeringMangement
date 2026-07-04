@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Communication in Management — Identification Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1826;
+    --ink-2:#16233A;
+    --ink-3:#1D2C47;
+    --wire:#2C3E60;
+    --paper:#ECE7DA;
+    --paper-dim:#94A0B8;
+    --signal:#E8A23C;
+    --signal-soft:rgba(232,162,60,0.15);
+    --correct:#6FA97C;
+    --correct-soft:rgba(111,169,124,0.14);
+    --incorrect:#C1584B;
+    --incorrect-soft:rgba(193,88,75,0.14);
+    --radius:14px;
+    --display: "Space Grotesk", sans-serif;
+    --body: "IBM Plex Sans", sans-serif;
+    --mono: "IBM Plex Mono", monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(232,162,60,0.06), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(111,169,124,0.05), transparent 40%),
+      var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 64px;
+  }
+
+  .app{
+    width:100%;
+    max-width:720px;
+  }
+
+  /* ---------- Transmission header ---------- */
+  .log{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--paper-dim);
+    text-transform:uppercase;
+    border-bottom:1px solid var(--wire);
+    padding-bottom:12px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .log__dot{
+    display:inline-block;
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--signal);
+    margin-right:8px;
+    box-shadow:0 0 8px var(--signal);
+  }
+
+  /* ---------- Screens ---------- */
+  .screen{display:none;}
+  .screen.is-active{display:block;animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  h1.title{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(28px,5vw,40px);
+    line-height:1.1;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--signal);
+    margin:0 0 14px;
+  }
+  .lede{
+    color:var(--paper-dim);
+    font-size:15.5px;
+    line-height:1.6;
+    max-width:520px;
+    margin:0 0 32px;
+  }
+
+  /* ---------- Signal diagram (start screen signature element) ---------- */
+  .diagram{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    margin:0 0 24px;
+    padding:28px 18px 34px;
+    background:var(--ink-2);
+    border:1px solid var(--wire);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .node{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    text-align:center;
+    color:var(--paper);
+    background:var(--ink-3);
+    border:1px solid var(--wire);
+    border-radius:8px;
+    padding:10px 8px;
+    width:78px;
+    flex:0 0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .node span{display:block;color:var(--paper-dim);font-size:9.5px;margin-top:3px;}
+  .track{
+    flex:1 1 auto;
+    height:2px;
+    background:var(--wire);
+    position:relative;
+    z-index:1;
+  }
+  .pulse{
+    position:absolute;
+    top:-3px;
+    left:0;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 10px var(--signal);
+    animation:travel 2.6s linear infinite;
+  }
+  @keyframes travel{
+    0%{left:0; opacity:0;}
+    8%{opacity:1;}
+    92%{opacity:1;}
+    100%{left:calc(100% - 8px); opacity:0;}
+  }
+  .feedback-line{
+    position:absolute;
+    left:14%;
+    right:14%;
+    bottom:10px;
+    height:1px;
+    border-top:1px dashed var(--wire);
+  }
+  .feedback-line::after{
+    content:"feedback";
+    position:absolute;
+    right:0;
+    top:-16px;
+    font-family:var(--mono);
+    font-size:9px;
+    color:var(--paper-dim);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  .howto{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    background:var(--ink-2);
+    border:1px solid var(--wire);
+    border-radius:10px;
+    padding:14px 16px;
+    margin:0 0 32px;
+    font-size:13.5px;
+    color:var(--paper-dim);
+    line-height:1.6;
+  }
+  .howto__tag{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--signal);
+    flex:0 0 auto;
+    border:1px solid var(--wire);
+    border-radius:5px;
+    padding:2px 7px;
+    margin-top:1px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:var(--body);
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+    background:var(--signal);
+    border:none;
+    border-radius:10px;
+    padding:14px 26px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:scale(0.98);}
+  .btn:focus-visible{outline:2px solid var(--paper);outline-offset:3px;}
+  .btn:disabled{opacity:0.4; cursor:not-allowed; filter:none;}
+  .btn--ghost{
+    background:transparent;
+    color:var(--paper);
+    border:1px solid var(--wire);
+  }
+  .btn--ghost:hover{background:var(--ink-3);}
+  .back-link{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:4px 10px;
+    border:1px solid var(--wire);
+    border-radius:6px;
+    transition:color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .back-link:hover{color:var(--paper); border-color:var(--paper-dim); background:var(--ink-3);}
+  .back-link svg{width:14px; height:14px;}
+  .meta-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .meta-row .info{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--paper-dim);
+    letter-spacing:0.04em;
+  }
+
+  /* ---------- Progress dots (quiz screen) ---------- */
+  .progress{
+    display:flex;
+    gap:5px;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+  }
+  .progress__dot{
+    width:100%;
+    height:5px;
+    border-radius:3px;
+    background:var(--wire);
+    flex:1 1 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .progress__dot.is-current::after{
+    content:"";
+    position:absolute; inset:0;
+    background:var(--signal);
+    opacity:.55;
+    animation:blink 1.2s ease-in-out infinite;
+  }
+  .progress__dot.is-correct{background:var(--correct);}
+  .progress__dot.is-incorrect{background:var(--incorrect);}
+  @keyframes blink{0%,100%{opacity:.25;}50%{opacity:.75;}}
+
+  .q-count{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--paper-dim);
+    letter-spacing:0.08em;
+    margin-bottom:10px;
+    text-transform:uppercase;
+  }
+
+  .question{
+    font-family:var(--display);
+    font-size:clamp(18px,3.2vw,22px);
+    font-weight:600;
+    line-height:1.4;
+    margin:0 0 22px;
+  }
+
+  /* ---------- Identification input ---------- */
+  .answer-form{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .answer-input{
+    flex:1 1 220px;
+    font-family:var(--mono);
+    font-size:15px;
+    color:var(--paper);
+    background:var(--ink-2);
+    border:1px solid var(--wire);
+    border-radius:10px;
+    padding:14px 16px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .answer-input::placeholder{color:#5C6B87;}
+  .answer-input:focus{border-color:var(--signal);}
+  .answer-input:disabled{opacity:0.75;}
+  .answer-input.is-correct{border-color:var(--correct); background:var(--correct-soft);}
+  .answer-input.is-incorrect{border-color:var(--incorrect); background:var(--incorrect-soft);}
+
+  .submit-row{display:flex; gap:10px;}
+
+  .reveal{
+    display:none;
+    font-family:var(--body);
+    font-size:14.5px;
+    line-height:1.6;
+    color:var(--paper-dim);
+    background:var(--ink-2);
+    border-left:3px solid var(--signal);
+    border-radius:0 8px 8px 0;
+    padding:14px 16px;
+    margin:18px 0 26px;
+  }
+  .reveal.is-visible{display:block;animation:fadein .3s ease;}
+  .reveal__label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:6px;
+  }
+  .reveal__label.ok{color:var(--correct);}
+  .reveal__label.no{color:var(--incorrect);}
+  .reveal__answer{
+    color:var(--paper);
+    font-weight:600;
+    font-family:var(--mono);
+  }
+
+  .quiz-footer{
+    display:flex;
+    justify-content:flex-end;
+  }
+
+  /* ---------- Results screen ---------- */
+  .result-tier{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--signal);
+    margin-bottom:8px;
+  }
+  .result-score{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(48px,10vw,72px);
+    line-height:1;
+    margin:0 0 6px;
+  }
+  .result-score span{font-size:0.4em; color:var(--paper-dim); font-weight:500;}
+  .result-label{
+    font-family:var(--display);
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 18px;
+  }
+  .result-desc{
+    color:var(--paper-dim);
+    line-height:1.6;
+    font-size:15px;
+    max-width:520px;
+    margin:0 0 30px;
+  }
+  .breakdown{
+    border-top:1px solid var(--wire);
+    padding-top:20px;
+    margin-bottom:30px;
+  }
+  .breakdown-row{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:12px 0;
+    border-bottom:1px solid var(--ink-3);
+    font-size:14px;
+  }
+  .breakdown-row:last-child{border-bottom:none;}
+  .breakdown-row__icon{
+    flex:0 0 auto;
+    font-family:var(--mono);
+    font-size:11px;
+    width:20px;height:20px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:1px;
+  }
+  .breakdown-row__icon.ok{background:var(--correct-soft); color:var(--correct); border:1px solid var(--correct);}
+  .breakdown-row__icon.no{background:var(--incorrect-soft); color:var(--incorrect); border:1px solid var(--incorrect);}
+  .breakdown-row__body{color:var(--paper-dim); line-height:1.55;}
+  .breakdown-row__body b{color:var(--paper); font-weight:600;}
+  .breakdown-row__you{
+    display:block;
+    margin-top:4px;
+    font-family:var(--mono);
+    font-size:12px;
+  }
+  .breakdown-row__you .lbl{color:#5C6B87; text-transform:uppercase; letter-spacing:0.05em; margin-right:6px;}
+  .breakdown-row__you .val.ok{color:var(--correct);}
+  .breakdown-row__you .val.no{color:var(--incorrect); text-decoration:line-through;}
+  .breakdown-row__you .val.answer{color:var(--signal); margin-left:8px; text-decoration:none;}
+
+  footer.credit{
+    margin-top:40px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--wire);
+    letter-spacing:0.06em;
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .pulse, .progress__dot.is-current::after, .screen.is-active{animation:none;}
+  }
+
+  @media (max-width:480px){
+    .diagram{padding:22px 10px 30px;}
+    .node{width:60px; padding:8px 4px; font-size:9px;}
+    .answer-form{flex-direction:column;}
+    .submit-row .btn{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="log">
+    <a href="index.html" class="back-link"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L4 7l5 5"/></svg>Change mode</a>
+    <span><span class="log__dot"></span>TRANSMISSION LOG</span>
+    <span id="logStatus">TOPIC: MANAGEMENT COMMUNICATION</span>
+  </div>
+
+  <!-- START SCREEN -->
+  <section class="screen is-active" id="screen-start">
+    <p class="eyebrow">Identification Quiz · Communication in Management</p>
+    <h1 class="title">Name the signal.</h1>
+    <p class="lede">Twenty-five identification items. Each one describes a term or concept from the lesson — type in what's being described.</p>
+
+    <div class="diagram">
+      <div class="node">Sender<span>encodes</span></div>
+      <div class="track"><span class="pulse"></span></div>
+      <div class="node">Channel<span>carries</span></div>
+      <div class="track"><span class="pulse" style="animation-delay:0.9s;"></span></div>
+      <div class="node">Receiver<span>decodes</span></div>
+      <div class="feedback-line"></div>
+    </div>
+
+    <div class="howto">
+      <span class="howto__tag">How it works</span>
+      <span>Read the description, type the term it's identifying, and press Enter or hit Submit. Answers are checked loosely — minor wording differences are fine, spelling still counts.</span>
+    </div>
+
+    <div class="meta-row">
+      <button class="btn" id="startBtn">Begin transmission</button>
+      <span class="info">25 items · type your answer</span>
+    </div>
+  </section>
+
+  <!-- QUIZ SCREEN -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress" id="progress"></div>
+    <p class="q-count" id="qCount">Item 1 / 25</p>
+    <h2 class="question" id="questionText"></h2>
+
+    <div class="answer-form">
+      <input type="text" class="answer-input" id="answerInput" placeholder="Type your answer…" autocomplete="off">
+      <div class="submit-row">
+        <button type="button" class="btn" id="submitBtn">Submit</button>
+      </div>
+    </div>
+
+    <div class="reveal" id="reveal">
+      <span class="reveal__label" id="revealLabel">Feedback</span>
+      <span id="revealText"></span>
+    </div>
+
+    <div class="quiz-footer">
+      <button class="btn" id="nextBtn" disabled>Next →</button>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section class="screen" id="screen-results">
+    <p class="result-tier" id="resultTier">Signal analysis</p>
+    <div class="result-score" id="resultScore">0<span>/25</span></div>
+    <h2 class="result-label" id="resultLabel"></h2>
+    <p class="result-desc" id="resultDesc"></p>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="meta-row">
+      <button class="btn" id="retryBtn">Retry transmission</button>
+      <button class="btn btn--ghost" id="reviewBtn">Review answers</button>
+      <a href="index.html" class="btn btn--ghost">Change quiz mode</a>
+    </div>
+  </section>
+
+  <footer class="credit">BASED ON "COMMUNICATION IN MANAGEMENT" LESSON NOTES · IDENTIFICATION FORMAT</footer>
+</div>
+
+<script>
+(function(){
+
+  const questions = [
+    {
+      q: "The sending and receiving of information, involving a sender who encodes a message and a receiver who decodes it.",
+      accepted: ["communication"],
+      feedback: "Communication is the sending and receiving of information between a sender and a receiver."
+    },
+    {
+      q: "The person who initiates communication and encodes the message to be sent.",
+      accepted: ["sender"],
+      feedback: "The sender is the person who has information and initiates the communication by encoding it."
+    },
+    {
+      q: "The person meant to receive the communication, who must decode the message to understand it.",
+      accepted: ["receiver"],
+      feedback: "The receiver is the person meant to receive the communication and must decode it."
+    },
+    {
+      q: "The process of converting thoughts into a message that can be transmitted to a receiver.",
+      accepted: ["encoding", "encode"],
+      feedback: "Encoding is turning information into words, text, images, or signals that can be sent."
+    },
+    {
+      q: "The process of converting a received message back into information that can be understood.",
+      accepted: ["decoding", "decode"],
+      feedback: "Decoding is the receiver's job — interpreting the message back into understandable information."
+    },
+    {
+      q: "The medium through which information is conveyed — for example, air, paper, or wires.",
+      accepted: ["channel"],
+      feedback: "The channel is the medium the message travels through, such as air, paper, or wires."
+    },
+    {
+      q: "The receiver's response that lets the sender know the message was received and how it was interpreted.",
+      accepted: ["feedback"],
+      feedback: "Feedback is what the receiver sends back to confirm the message was received and understood correctly."
+    },
+    {
+      q: "The model that describes how information is sent and received during the communication process.",
+      accepted: ["communication-process model", "communication process model"],
+      feedback: "The communication-process model describes how information is encoded, sent, and decoded."
+    },
+    {
+      q: "The percentage range of a manager's time typically spent communicating with employees and others.",
+      accepted: ["70-90%", "70 to 90 percent", "70-90 percent", "70% to 90%", "70 90", "70-90"],
+      feedback: "Managers spend between 70 and 90 percent of their time communicating."
+    },
+    {
+      q: "The term for communication acting as the way managers carry out planning, organizing, staffing, directing, and controlling.",
+      accepted: ["linking process", "linking process of management"],
+      feedback: "Communication is described as the linking process of management."
+    },
+    {
+      q: "What staff members who hold important organizational information become, according to the lesson.",
+      accepted: ["centers of power", "center of power", "centres of power"],
+      feedback: "Staff members holding key information become centers of power in the organization."
+    },
+    {
+      q: "The benefit of effective communication that makes roles, responsibilities, and relationships clear to everyone.",
+      accepted: ["clarity", "provides clarity"],
+      feedback: "This benefit is called \"provides clarity\" — it removes confusion, uncertainty, and ambiguity."
+    },
+    {
+      q: "The benefit of effective communication that reduces tension between hierarchical levels of employees.",
+      accepted: ["builds relationships"],
+      feedback: "\"Builds relationships\" describes how open communication reduces tension across levels of employees."
+    },
+    {
+      q: "The benefit of effective communication that comes from listening to employees and valuing their input.",
+      accepted: ["creates commitment"],
+      feedback: "\"Creates commitment\" — listening to employees makes them feel like valued contributors."
+    },
+    {
+      q: "The term describing management communication as the connector between top-level management and the rest of the team.",
+      accepted: ["linchpin"],
+      feedback: "Management communication is called the linchpin connecting top-level management with the team."
+    },
+    {
+      q: "The management communication element where consistent messages make employees feel secure and confident.",
+      accepted: ["consistency"],
+      feedback: "Consistency in communication helps build trust in employees' roles."
+    },
+    {
+      q: "The management communication element that involves paying attention to employees' concerns and feedback.",
+      accepted: ["active listening"],
+      feedback: "Active listening means managers pay attention to concerns and feedback, not just speaking."
+    },
+    {
+      q: "The management communication element referring to channels like team meetings, suggestion boxes, or digital platforms.",
+      accepted: ["feedback mechanisms", "feedback mechanism"],
+      feedback: "Feedback mechanisms are the established channels through which employees can respond."
+    },
+    {
+      q: "The management communication element requiring messages to be clear and concise to avoid misunderstandings.",
+      accepted: ["clarity"],
+      feedback: "Clarity means messages must be clear and concise, since ambiguity causes errors and frustration."
+    },
+    {
+      q: "The workplace importance factor that gives employees clear directions, expectations, and goals.",
+      accepted: ["clarity and direction", "clarity & direction"],
+      feedback: "\"Clarity and direction\" lets employees understand roles and work more efficiently."
+    },
+    {
+      q: "The workplace importance factor that keeps employees informed about organizational changes, strategies, and decisions.",
+      accepted: ["transparency"],
+      feedback: "Transparency builds trust and reduces uncertainty by keeping employees informed."
+    },
+    {
+      q: "The workplace importance factor where employees contribute ideas and participate more because they know their voices are heard.",
+      accepted: ["employee engagement", "engagement"],
+      feedback: "Employee engagement grows when people feel valued and know they're being heard."
+    },
+    {
+      q: "The workplace importance factor that serves as a platform for resolving conflicts and addressing issues.",
+      accepted: ["conflict resolution"],
+      feedback: "Conflict resolution relies on open communication channels to catch and resolve issues early."
+    },
+    {
+      q: "The workplace importance factor that brings teams together through a shared understanding of roles and responsibilities.",
+      accepted: ["team cohesion"],
+      feedback: "Team cohesion comes from a shared understanding that encourages collaboration and unity."
+    },
+    {
+      q: "The workplace importance factor boosted by well-communicated goals and recognized achievements.",
+      accepted: ["motivation"],
+      feedback: "Motivation rises when goals are well-communicated and successes are recognized and celebrated."
+    }
+  ];
+
+  const state = {
+    current: 0,
+    score: 0,
+    answered: [] // {correct: bool, userText: string}
+  };
+
+  const screens = {
+    start: document.getElementById('screen-start'),
+    quiz: document.getElementById('screen-quiz'),
+    results: document.getElementById('screen-results')
+  };
+
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('is-active'));
+    screens[name].classList.add('is-active');
+  }
+
+  function normalize(str){
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/^(the|a|an)\s+/, '')
+      .replace(/[.,;:!?"'%]/g, m => m === '%' ? '%' : '')
+      .replace(/\s+/g, ' ');
+  }
+
+  function isCorrect(input, accepted){
+    const norm = normalize(input);
+    if (!norm) return false;
+    return accepted.some(a => normalize(a) === norm);
+  }
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    state.current = 0;
+    state.score = 0;
+    state.answered = [];
+    document.getElementById('logStatus').textContent = 'STATUS: IN TRANSMISSION';
+    buildProgress();
+    renderQuestion();
+    showScreen('quiz');
+  });
+
+  function buildProgress(){
+    const wrap = document.getElementById('progress');
+    wrap.innerHTML = '';
+    questions.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'progress__dot';
+      dot.dataset.index = i;
+      wrap.appendChild(dot);
+    });
+  }
+
+  function updateProgress(){
+    const dots = document.querySelectorAll('.progress__dot');
+    dots.forEach((dot, i) => {
+      dot.classList.remove('is-current', 'is-correct', 'is-incorrect');
+      if (state.answered[i] !== undefined){
+        dot.classList.add(state.answered[i].correct ? 'is-correct' : 'is-incorrect');
+      } else if (i === state.current){
+        dot.classList.add('is-current');
+      }
+    });
+  }
+
+  function renderQuestion(){
+    const item = questions[state.current];
+    document.getElementById('qCount').textContent = `Item ${state.current + 1} / ${questions.length}`;
+    document.getElementById('questionText').textContent = item.q;
+
+    const input = document.getElementById('answerInput');
+    input.value = '';
+    input.disabled = false;
+    input.classList.remove('is-correct', 'is-incorrect');
+    document.getElementById('submitBtn').disabled = false;
+
+    document.getElementById('reveal').classList.remove('is-visible');
+    document.getElementById('nextBtn').disabled = true;
+    document.getElementById('nextBtn').textContent = state.current === questions.length - 1 ? 'See results →' : 'Next →';
+    updateProgress();
+    setTimeout(() => input.focus(), 50);
+  }
+
+  function submitAnswer(){
+    if (state.answered[state.current] !== undefined) return;
+
+    const item = questions[state.current];
+    const input = document.getElementById('answerInput');
+    const userText = input.value;
+    const correct = isCorrect(userText, item.accepted);
+
+    state.answered[state.current] = { correct: correct, userText: userText.trim() };
+    if (correct) state.score++;
+
+    input.disabled = true;
+    input.classList.add(correct ? 'is-correct' : 'is-incorrect');
+    document.getElementById('submitBtn').disabled = true;
+
+    const reveal = document.getElementById('reveal');
+    const label = document.getElementById('revealLabel');
+    label.textContent = correct ? 'Correct' : 'Not quite';
+    label.className = 'reveal__label ' + (correct ? 'ok' : 'no');
+    document.getElementById('revealText').innerHTML =
+      (correct ? '' : `Correct answer: <span class="reveal__answer">${item.accepted[0]}</span>. `) + item.feedback;
+    reveal.classList.add('is-visible');
+
+    document.getElementById('nextBtn').disabled = false;
+    updateProgress();
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+
+  document.getElementById('answerInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (state.current < questions.length - 1){
+      state.current++;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  });
+
+  function tierFor(score, total){
+    const pct = score / total;
+    if (pct >= 0.87) return {
+      tier: 'Signal analysis: excellent',
+      label: 'Crystal-clear signal',
+      desc: 'Almost nothing was lost in transmission. The vocabulary of management communication — sender, channel, feedback, and the rest — is clearly locked in.'
+    };
+    if (pct >= 0.67) return {
+      tier: 'Signal analysis: strong',
+      label: 'Clear signal, minor noise',
+      desc: 'Most terms were correctly identified. A short review of the missed items should close the remaining gaps.'
+    };
+    if (pct >= 0.4) return {
+      tier: 'Signal analysis: mixed',
+      label: 'Some static on the line',
+      desc: 'A good number of terms came through, but several got scrambled. Worth revisiting the lesson\'s key terms and definitions.'
+    };
+    return {
+      tier: 'Signal analysis: weak',
+      label: 'Message lost in transmission',
+      desc: "Most terms didn't come through clearly this time. Re-reading the lesson's key definitions before trying again should help."
+    };
+  }
+
+  function showResults(){
+    document.getElementById('logStatus').textContent = 'STATUS: TRANSMISSION COMPLETE';
+    const total = questions.length;
+    const result = tierFor(state.score, total);
+
+    document.getElementById('resultTier').textContent = result.tier;
+    document.getElementById('resultScore').innerHTML = `${state.score}<span>/${total}</span>`;
+    document.getElementById('resultLabel').textContent = result.label;
+    document.getElementById('resultDesc').textContent = result.desc;
+
+    const breakdown = document.getElementById('breakdown');
+    breakdown.innerHTML = '';
+    questions.forEach((item, i) => {
+      const ans = state.answered[i];
+      const row = document.createElement('div');
+      row.className = 'breakdown-row';
+      const youText = ans.userText ? ans.userText : '(no answer)';
+      row.innerHTML = `
+        <span class="breakdown-row__icon ${ans.correct ? 'ok' : 'no'}">${ans.correct ? '✓' : '✕'}</span>
+        <span class="breakdown-row__body">
+          <b>Item ${i + 1}.</b> ${item.q}
+          <span class="breakdown-row__you">
+            <span class="lbl">You wrote</span><span class="val ${ans.correct ? 'ok' : 'no'}">${youText}</span>${ans.correct ? '' : `<span class="val answer">→ ${item.accepted[0]}</span>`}
+          </span>
+        </span>
+      `;
+      breakdown.appendChild(row);
+    });
+    breakdown.style.display = 'none';
+
+    showScreen('results');
+  }
+
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    document.getElementById('logStatus').textContent = 'TOPIC: MANAGEMENT COMMUNICATION';
+    showScreen('start');
+  });
+
+  document.getElementById('reviewBtn').addEventListener('click', () => {
+    const breakdown = document.getElementById('breakdown');
+    const btn = document.getElementById('reviewBtn');
+    const isHidden = breakdown.style.display === 'none';
+    breakdown.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? 'Hide answers' : 'Review answers';
+  });
+
+})();
+</script>
+
+</body>
+</html>

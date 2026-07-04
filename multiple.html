@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Communication in Management — Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1826;
+    --ink-2:#16233A;
+    --ink-3:#1D2C47;
+    --wire:#2C3E60;
+    --paper:#ECE7DA;
+    --paper-dim:#94A0B8;
+    --signal:#E8A23C;
+    --signal-soft:rgba(232,162,60,0.15);
+    --correct:#6FA97C;
+    --correct-soft:rgba(111,169,124,0.14);
+    --incorrect:#C1584B;
+    --incorrect-soft:rgba(193,88,75,0.14);
+    --radius:14px;
+    --display: "Space Grotesk", sans-serif;
+    --body: "IBM Plex Sans", sans-serif;
+    --mono: "IBM Plex Mono", monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(232,162,60,0.06), transparent 45%),
+      radial-gradient(circle at 100% 100%, rgba(111,169,124,0.05), transparent 40%),
+      var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 64px;
+  }
+
+  .app{
+    width:100%;
+    max-width:720px;
+  }
+
+  /* ---------- Transmission header ---------- */
+  .log{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--paper-dim);
+    text-transform:uppercase;
+    border-bottom:1px solid var(--wire);
+    padding-bottom:12px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .log__dot{
+    display:inline-block;
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--signal);
+    margin-right:8px;
+    box-shadow:0 0 8px var(--signal);
+  }
+
+  /* ---------- Screens ---------- */
+  .screen{display:none;}
+  .screen.is-active{display:block;animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  h1.title{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(28px,5vw,40px);
+    line-height:1.1;
+    margin:0 0 10px;
+    letter-spacing:-0.01em;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--signal);
+    margin:0 0 14px;
+  }
+  .lede{
+    color:var(--paper-dim);
+    font-size:15.5px;
+    line-height:1.6;
+    max-width:520px;
+    margin:0 0 32px;
+  }
+
+  /* ---------- Signal diagram (start screen signature element) ---------- */
+  .diagram{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    margin:0 0 36px;
+    padding:28px 18px 34px;
+    background:var(--ink-2);
+    border:1px solid var(--wire);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .node{
+    font-family:var(--mono);
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    text-align:center;
+    color:var(--paper);
+    background:var(--ink-3);
+    border:1px solid var(--wire);
+    border-radius:8px;
+    padding:10px 8px;
+    width:78px;
+    flex:0 0 auto;
+    position:relative;
+    z-index:2;
+  }
+  .node span{display:block;color:var(--paper-dim);font-size:9.5px;margin-top:3px;}
+  .track{
+    flex:1 1 auto;
+    height:2px;
+    background:var(--wire);
+    position:relative;
+    z-index:1;
+  }
+  .pulse{
+    position:absolute;
+    top:-3px;
+    left:0;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 10px var(--signal);
+    animation:travel 2.6s linear infinite;
+  }
+  @keyframes travel{
+    0%{left:0; opacity:0;}
+    8%{opacity:1;}
+    92%{opacity:1;}
+    100%{left:calc(100% - 8px); opacity:0;}
+  }
+  .feedback-line{
+    position:absolute;
+    left:14%;
+    right:14%;
+    bottom:10px;
+    height:1px;
+    border-top:1px dashed var(--wire);
+  }
+  .feedback-line::after{
+    content:"feedback";
+    position:absolute;
+    right:0;
+    top:-16px;
+    font-family:var(--mono);
+    font-size:9px;
+    color:var(--paper-dim);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:var(--body);
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+    background:var(--signal);
+    border:none;
+    border-radius:10px;
+    padding:14px 26px;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:scale(0.98);}
+  .btn:focus-visible{outline:2px solid var(--paper);outline-offset:3px;}
+  .btn--ghost{
+    background:transparent;
+    color:var(--paper);
+    border:1px solid var(--wire);
+  }
+  .btn--ghost:hover{background:var(--ink-3);}
+  .back-link{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:4px 10px;
+    border:1px solid var(--wire);
+    border-radius:6px;
+    transition:color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .back-link:hover{color:var(--paper); border-color:var(--paper-dim); background:var(--ink-3);}
+  .back-link svg{width:14px; height:14px;}
+  .meta-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .meta-row .info{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--paper-dim);
+    letter-spacing:0.04em;
+  }
+
+  /* ---------- Progress dots (quiz screen) ---------- */
+  .progress{
+    display:flex;
+    gap:6px;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+  }
+  .progress__dot{
+    width:100%;
+    height:5px;
+    border-radius:3px;
+    background:var(--wire);
+    flex:1 1 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .progress__dot.is-current::after{
+    content:"";
+    position:absolute; inset:0;
+    background:var(--signal);
+    opacity:.55;
+    animation:blink 1.2s ease-in-out infinite;
+  }
+  .progress__dot.is-correct{background:var(--correct);}
+  .progress__dot.is-incorrect{background:var(--incorrect);}
+  @keyframes blink{0%,100%{opacity:.25;}50%{opacity:.75;}}
+
+  .q-count{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--paper-dim);
+    letter-spacing:0.08em;
+    margin-bottom:10px;
+    text-transform:uppercase;
+  }
+
+  .question{
+    font-family:var(--display);
+    font-size:clamp(19px,3.4vw,23px);
+    font-weight:600;
+    line-height:1.35;
+    margin:0 0 22px;
+  }
+
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .option{
+    text-align:left;
+    font-family:var(--body);
+    font-size:15px;
+    color:var(--paper);
+    background:var(--ink-2);
+    border:1px solid var(--wire);
+    border-radius:10px;
+    padding:14px 16px;
+    cursor:pointer;
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .option:hover:not(:disabled){border-color:var(--signal); background:var(--ink-3);}
+  .option:focus-visible{outline:2px solid var(--signal); outline-offset:2px;}
+  .option:disabled{cursor:default;}
+  .option__key{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--paper-dim);
+    border:1px solid var(--wire);
+    border-radius:5px;
+    padding:1px 6px;
+    flex:0 0 auto;
+    margin-top:1px;
+  }
+  .option.is-correct{
+    background:var(--correct-soft);
+    border-color:var(--correct);
+  }
+  .option.is-correct .option__key{color:var(--correct); border-color:var(--correct);}
+  .option.is-incorrect{
+    background:var(--incorrect-soft);
+    border-color:var(--incorrect);
+  }
+  .option.is-incorrect .option__key{color:var(--incorrect); border-color:var(--incorrect);}
+
+  .feedback{
+    display:none;
+    font-family:var(--body);
+    font-size:14.5px;
+    line-height:1.6;
+    color:var(--paper-dim);
+    background:var(--ink-2);
+    border-left:3px solid var(--signal);
+    border-radius:0 8px 8px 0;
+    padding:14px 16px;
+    margin:18px 0 26px;
+  }
+  .feedback.is-visible{display:block;animation:fadein .3s ease;}
+  .feedback__label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--signal);
+    display:block;
+    margin-bottom:6px;
+  }
+
+  .quiz-footer{
+    display:flex;
+    justify-content:flex-end;
+  }
+
+  /* ---------- Results screen ---------- */
+  .result-tier{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--signal);
+    margin-bottom:8px;
+  }
+  .result-score{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(48px,10vw,72px);
+    line-height:1;
+    margin:0 0 6px;
+  }
+  .result-score span{font-size:0.4em; color:var(--paper-dim); font-weight:500;}
+  .result-label{
+    font-family:var(--display);
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 18px;
+  }
+  .result-desc{
+    color:var(--paper-dim);
+    line-height:1.6;
+    font-size:15px;
+    max-width:520px;
+    margin:0 0 30px;
+  }
+  .breakdown{
+    border-top:1px solid var(--wire);
+    padding-top:20px;
+    margin-bottom:30px;
+  }
+  .breakdown-row{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    padding:10px 0;
+    border-bottom:1px solid var(--ink-3);
+    font-size:14px;
+  }
+  .breakdown-row:last-child{border-bottom:none;}
+  .breakdown-row__icon{
+    flex:0 0 auto;
+    font-family:var(--mono);
+    font-size:11px;
+    width:20px;height:20px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:1px;
+  }
+  .breakdown-row__icon.ok{background:var(--correct-soft); color:var(--correct); border:1px solid var(--correct);}
+  .breakdown-row__icon.no{background:var(--incorrect-soft); color:var(--incorrect); border:1px solid var(--incorrect);}
+  .breakdown-row__text{color:var(--paper-dim); line-height:1.5;}
+  .breakdown-row__text b{color:var(--paper); font-weight:600;}
+
+  footer.credit{
+    margin-top:40px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--wire);
+    letter-spacing:0.06em;
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .pulse, .progress__dot.is-current::after, .screen.is-active{animation:none;}
+  }
+
+  @media (max-width:480px){
+    .diagram{padding:22px 10px 30px;}
+    .node{width:64px; padding:8px 5px; font-size:9.5px;}
+    .option{font-size:14px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="log">
+    <a href="index.html" class="back-link"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L4 7l5 5"/></svg>Change mode</a>
+    <span><span class="log__dot"></span>TRANSMISSION LOG</span>
+    <span id="logStatus">TOPIC: MANAGEMENT COMMUNICATION</span>
+  </div>
+
+  <!-- START SCREEN -->
+  <section class="screen is-active" id="screen-start">
+    <p class="eyebrow">Quiz · Communication in Management</p>
+    <h1 class="title">Can you decode the message?</h1>
+    <p class="lede">Thirty questions on how information moves through an organization — sender, channel, receiver, feedback — and why management runs on communication.</p>
+
+    <div class="diagram">
+      <div class="node">Sender<span>encodes</span></div>
+      <div class="track"><span class="pulse"></span></div>
+      <div class="node">Channel<span>carries</span></div>
+      <div class="track"><span class="pulse" style="animation-delay:0.9s;"></span></div>
+      <div class="node">Receiver<span>decodes</span></div>
+      <div class="feedback-line"></div>
+    </div>
+
+    <div class="meta-row">
+      <button class="btn" id="startBtn">Begin transmission</button>
+      <span class="info">30 questions · no time limit</span>
+    </div>
+  </section>
+
+  <!-- QUIZ SCREEN -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress" id="progress"></div>
+    <p class="q-count" id="qCount">Question 1 / 15</p>
+    <h2 class="question" id="questionText"></h2>
+    <div class="options" id="optionsList"></div>
+    <div class="feedback" id="feedback">
+      <span class="feedback__label">Feedback</span>
+      <span id="feedbackText"></span>
+    </div>
+    <div class="quiz-footer">
+      <button class="btn" id="nextBtn" disabled>Next →</button>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section class="screen" id="screen-results">
+    <p class="result-tier" id="resultTier">Signal analysis</p>
+    <div class="result-score" id="resultScore">0<span>/15</span></div>
+    <h2 class="result-label" id="resultLabel"></h2>
+    <p class="result-desc" id="resultDesc"></p>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="meta-row">
+      <button class="btn" id="retryBtn">Retry transmission</button>
+      <button class="btn btn--ghost" id="reviewBtn">Review answers</button>
+      <a href="index.html" class="btn btn--ghost">Change quiz mode</a>
+    </div>
+  </section>
+
+  <footer class="credit">BASED ON "COMMUNICATION IN MANAGEMENT" LESSON NOTES</footer>
+</div>
+
+<script>
+(function(){
+
+  const questions = [
+    {
+      q: "What is communication, as defined in the lesson?",
+      options: [
+        "The process of managing organizational resources",
+        "The sending and receiving of information between a sender and a receiver",
+        "The act of writing formal reports",
+        "A one-way transfer of instructions from managers to employees"
+      ],
+      correct: 1,
+      feedback: "Communication involves a sender who initiates and encodes a message, and a receiver who must decode it to understand it."
+    },
+    {
+      q: "In the communication-process model, what must happen to information before it can be sent?",
+      options: [
+        "It must be decoded",
+        "It must be filtered through feedback",
+        "It must be encoded into a form that can be transmitted",
+        "It must be approved by the receiver first"
+      ],
+      correct: 2,
+      feedback: "The sender encodes information — putting it into words, text, images, or electronic signals — before it can be transmitted."
+    },
+    {
+      q: "What is the \"channel\" in the communication process?",
+      options: [
+        "The person who starts the communication",
+        "The medium through which information is conveyed, such as air, paper, or wires",
+        "The feedback loop between sender and receiver",
+        "The organization's chain of command"
+      ],
+      correct: 1,
+      feedback: "The channel is the medium the message travels through — for example, air carrying sound waves or wires carrying electronic signals."
+    },
+    {
+      q: "What does the receiver do to understand an incoming message?",
+      options: [
+        "Encodes it",
+        "Decodes it — converts it back into information that can be understood",
+        "Sends it back unread",
+        "Waits for a second sender"
+      ],
+      correct: 1,
+      feedback: "The receiver reverses the sender's process: decoding the message so it can be understood."
+    },
+    {
+      q: "What is \"feedback\" in the communication process?",
+      options: [
+        "A formal annual performance review",
+        "The receiver's response showing the message was received and how it was interpreted",
+        "A complaint filed with HR",
+        "The original message sent by the sender"
+      ],
+      correct: 1,
+      feedback: "Feedback lets the receiver signal back to the sender that the message was received and interpreted — often starting a back-and-forth exchange."
+    },
+    {
+      q: "According to the lesson, roughly how much of a manager's time is spent communicating?",
+      options: [
+        "10–20%",
+        "30–50%",
+        "70–90%",
+        "Nearly 100%, leaving no time for other tasks"
+      ],
+      correct: 2,
+      feedback: "Managers spend between 70 and 90 percent of their time communicating with employees and other internal and external contacts."
+    },
+    {
+      q: "Which of these is one of the reasons the lesson gives for why communication is central to management?",
+      options: [
+        "It replaces the need for planning",
+        "It is a linking process that lets managers carry out planning, organizing, staffing, directing, and controlling",
+        "It removes the need for decision-making",
+        "It eliminates organizational hierarchy"
+      ],
+      correct: 1,
+      feedback: "Communication is described as the linking process of management — the way managers actually carry out the other managerial functions."
+    },
+    {
+      q: "Why does the lesson say \"information and communication represent power\" in organizations?",
+      options: [
+        "Because only executives are permitted to communicate",
+        "Because staff members who hold important information become centers of power",
+        "Because communication is legally regulated",
+        "Because power has nothing to do with information access"
+      ],
+      correct: 1,
+      feedback: "Employees can't act constructively without knowing what to do, when, and who else is involved — so those holding that information become centers of power."
+    },
+    {
+      q: "How does effective communication \"provide clarity,\" per the lesson?",
+      options: [
+        "It removes the need for any written policies",
+        "It makes roles, responsibilities, and relationships clear, reducing confusion and uncooperativeness",
+        "It guarantees employees higher pay",
+        "It removes the need for feedback entirely"
+      ],
+      correct: 1,
+      feedback: "Confusion, uncertainty, and ambiguity make people uncomfortable and uncooperative — clarity gives everyone what they need to do their jobs."
+    },
+    {
+      q: "How does effective communication help \"build relationships\"?",
+      options: [
+        "By enforcing stricter hierarchy between levels of employees",
+        "By reducing tension between hierarchical levels and fostering a trusting, collaborative culture",
+        "By restricting communication to official memos only",
+        "By discouraging employees from offering suggestions"
+      ],
+      correct: 1,
+      feedback: "A culture of open communication reduces tension between levels of employees and makes people more likely to seek help and suggest improvements."
+    },
+    {
+      q: "What does \"creates commitment\" mean as a benefit of effective communication?",
+      options: [
+        "Communication only needs to flow from managers downward",
+        "Listening to employees and giving weight to their input makes them feel valued, which increases engagement",
+        "Employees must sign a formal commitment agreement",
+        "Commitment has nothing to do with communication"
+      ],
+      correct: 1,
+      feedback: "Effective communication involves receiving information as well as sending it — listening to concerns and input builds valued, motivated employees."
+    },
+    {
+      q: "Which of the following is listed as a key management communication element?",
+      options: [
+        "Secrecy",
+        "Consistency",
+        "Blame delegation",
+        "Avoiding feedback"
+      ],
+      correct: 1,
+      feedback: "Consistent messaging helps build trust — employees who receive consistent messages feel more secure and confident in their roles."
+    },
+    {
+      q: "What does \"active listening\" mean as a management communication element?",
+      options: [
+        "Speaking louder than employees during meetings",
+        "Paying attention to employees' concerns and feedback so they feel valued",
+        "Listening only during scheduled annual reviews",
+        "Recording conversations without telling employees"
+      ],
+      correct: 1,
+      feedback: "Communication isn't just about speaking — managers need to actively listen to concerns and feedback."
+    },
+    {
+      q: "Why are \"feedback mechanisms\" important in management communication?",
+      options: [
+        "They're optional and rarely used in practice",
+        "They establish channels — like team meetings, suggestion boxes, or digital platforms — for employees to respond",
+        "They replace the need for clear messaging",
+        "They matter only for customer-facing teams"
+      ],
+      correct: 1,
+      feedback: "Establishing channels for feedback, such as regular meetings or digital platforms, is essential to management communication."
+    },
+    {
+      q: "According to the lesson, why is \"enhanced productivity\" linked to good management communication?",
+      options: [
+        "Employees waste less time deciphering vague messages or seeking clarification",
+        "It reduces the total number of employees needed",
+        "It removes the need for any planning process",
+        "It automatically increases sales figures"
+      ],
+      correct: 0,
+      feedback: "When communication is clear, employees spend less time decoding vague messages, which boosts overall productivity."
+    },
+    {
+      q: "What happens to an organization when communication is diminished or hampered?",
+      options: [
+        "Nothing changes noticeably",
+        "The entire organization suffers",
+        "Only the marketing department is affected",
+        "Communication automatically improves over time"
+      ],
+      correct: 1,
+      feedback: "Organizations are totally reliant on communication — if it's diminished or hampered, the entire organization suffers."
+    },
+    {
+      q: "Which of these is one of the four primary reasons the lesson gives for communication being central to management?",
+      options: [
+        "Communication is the primary means by which people obtain and exchange information",
+        "Communication eliminates the need for staffing",
+        "Communication replaces organizational structure",
+        "Communication is only needed during a crisis"
+      ],
+      correct: 0,
+      feedback: "Communication is the primary means by which people obtain and exchange information — and decisions depend on the quality of that information."
+    },
+    {
+      q: "Why does the quality of information matter for decision-making, per the lesson?",
+      options: [
+        "It doesn't affect decisions at all",
+        "Decisions often depend on the quality and quantity of information received, so poor information leads to poor decisions",
+        "Poor information only affects entry-level staff",
+        "Decisions are made independently of communication"
+      ],
+      correct: 1,
+      feedback: "If the information a decision is based on is poor or incomplete, the decision itself will often be incorrect."
+    },
+    {
+      q: "What is described as the most time-consuming activity a manager engages in?",
+      options: [
+        "Planning budgets",
+        "Communication",
+        "Hiring new staff",
+        "Attending conferences"
+      ],
+      correct: 1,
+      feedback: "Communication is the most time-consuming activity a manager engages in, consistent with the 70–90% figure mentioned earlier in the lesson."
+    },
+    {
+      q: "What is described as \"a critical managerial skill and a foundation of effective leadership\"?",
+      options: [
+        "Technical expertise in one department",
+        "The ability to communicate well, both orally and in writing",
+        "The ability to work without any feedback",
+        "Strict adherence to hierarchy"
+      ],
+      correct: 1,
+      feedback: "Communicating well — orally and in writing — is called out as a critical managerial skill and a foundation of effective leadership."
+    },
+    {
+      q: "According to the lesson, what can no manager do successfully without being a good communicator?",
+      options: [
+        "Handle conflict, negotiate, and succeed at leadership",
+        "Balance a budget",
+        "Hire remote employees",
+        "Use spreadsheet software"
+      ],
+      correct: 0,
+      feedback: "No manager can handle conflict, negotiate successfully, or succeed at leadership without being a good communicator."
+    },
+    {
+      q: "How is \"management communication\" itself described in the lesson?",
+      options: [
+        "A minor administrative task",
+        "The linchpin that connects top-level management with the rest of the team, providing clarity, transparency, and unity",
+        "A process only used during layoffs",
+        "A replacement for formal planning"
+      ],
+      correct: 1,
+      feedback: "Management communication is the linchpin connecting top-level management with the rest of the team, providing clarity, transparency, and unity."
+    },
+    {
+      q: "What role does management communication play regarding \"transparency\"?",
+      options: [
+        "It has no effect on transparency",
+        "It fosters transparency by keeping employees informed about organizational changes, strategies, and decisions",
+        "It intentionally withholds information from employees",
+        "It matters only to shareholders, not employees"
+      ],
+      correct: 1,
+      feedback: "Transparency comes from keeping employees informed about changes, strategies, and decisions — and this builds trust and reduces uncertainty."
+    },
+    {
+      q: "How does effective communication support \"employee engagement,\" per the lesson?",
+      options: [
+        "Employees are more likely to contribute ideas and participate when they know their voices are heard",
+        "Engagement is unrelated to communication",
+        "It discourages employees from asking questions",
+        "It replaces the need for management altogether"
+      ],
+      correct: 0,
+      feedback: "Effective communication makes employees feel valued and engaged, so they're more likely to contribute ideas and ask questions."
+    },
+    {
+      q: "How does management communication support \"conflict resolution\"?",
+      options: [
+        "It has no role in resolving conflict",
+        "Open communication channels allow problems to be identified and resolved quickly, before they escalate",
+        "It is only used after conflicts become public",
+        "It assigns blame rather than resolving issues"
+      ],
+      correct: 1,
+      feedback: "Communication serves as a platform for resolving conflicts and exchanging information — open channels catch problems before they escalate."
+    },
+    {
+      q: "What does \"team cohesion\" mean as a benefit of management communication?",
+      options: [
+        "It brings teams together through a shared understanding of roles and responsibilities, encouraging collaboration",
+        "It ensures every team member works in isolation",
+        "It replaces the need for teamwork",
+        "It is unrelated to communication"
+      ],
+      correct: 0,
+      feedback: "Management communication brings teams together by giving everyone a shared understanding of roles and responsibilities."
+    },
+    {
+      q: "How does management communication contribute to \"motivation,\" according to the lesson?",
+      options: [
+        "Well-communicated goals and recognized achievements can boost morale and motivation",
+        "Motivation depends only on salary, not communication",
+        "Communicating goals discourages employees",
+        "Motivation is fixed and cannot be influenced by management"
+      ],
+      correct: 0,
+      feedback: "Well-communicated goals, along with recognizing and celebrating successes, can boost morale and motivation."
+    },
+    {
+      q: "How does management communication support \"risk management\"?",
+      options: [
+        "It has no connection to risk",
+        "It conveys important information related to compliance, safety, and ethical conduct, reducing legal and reputational issues",
+        "It increases the likelihood of legal issues",
+        "It is only relevant to the legal department"
+      ],
+      correct: 1,
+      feedback: "By conveying information on compliance, safety, and ethical conduct, communication reduces the likelihood of legal and reputational problems."
+    },
+    {
+      q: "Why does the lesson say the communication process becomes \"more complex\" than simply one person sending a message and another receiving it?",
+      options: [
+        "Because organizations don't need clear communication",
+        "Because the information in the message must be sent and received accurately",
+        "Because only written communication counts as real communication",
+        "Because feedback is unnecessary"
+      ],
+      correct: 1,
+      feedback: "The process seems simple on the surface, but it becomes complex because the information must be sent and received accurately to be useful."
+    },
+    {
+      q: "What does \"clarity,\" as a key management communication element, refer to?",
+      options: [
+        "Messages must be clear and concise, since ambiguity can lead to misunderstandings, errors, and frustration",
+        "Messages should be as long and detailed as possible",
+        "Clarity refers only to font choice and formatting",
+        "Clarity has nothing to do with reducing errors"
+      ],
+      correct: 0,
+      feedback: "Clarity means messages must be clear and concise — ambiguity is what leads to misunderstandings, errors, and frustration."
+    }
+  ];
+
+  const state = {
+    current: 0,
+    score: 0,
+    answered: [] // {correct: bool}
+  };
+
+  const screens = {
+    start: document.getElementById('screen-start'),
+    quiz: document.getElementById('screen-quiz'),
+    results: document.getElementById('screen-results')
+  };
+
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('is-active'));
+    screens[name].classList.add('is-active');
+  }
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    state.current = 0;
+    state.score = 0;
+    state.answered = [];
+    document.getElementById('logStatus').textContent = 'STATUS: IN TRANSMISSION';
+    buildProgress();
+    renderQuestion();
+    showScreen('quiz');
+  });
+
+  function buildProgress(){
+    const wrap = document.getElementById('progress');
+    wrap.innerHTML = '';
+    questions.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'progress__dot';
+      dot.dataset.index = i;
+      wrap.appendChild(dot);
+    });
+  }
+
+  function updateProgress(){
+    const dots = document.querySelectorAll('.progress__dot');
+    dots.forEach((dot, i) => {
+      dot.classList.remove('is-current', 'is-correct', 'is-incorrect');
+      if (state.answered[i] !== undefined){
+        dot.classList.add(state.answered[i].correct ? 'is-correct' : 'is-incorrect');
+      } else if (i === state.current){
+        dot.classList.add('is-current');
+      }
+    });
+  }
+
+  // Fisher-Yates shuffle for an array (in place)
+  function shuffle(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function renderQuestion(){
+    const item = questions[state.current];
+    document.getElementById('qCount').textContent = `Question ${state.current + 1} / ${questions.length}`;
+    document.getElementById('questionText').textContent = item.q;
+
+    // Build shuffled index order so the correct answer moves to a random position
+    const indices = shuffle([0, 1, 2, 3]);
+    // Find the new position of the original correct index after shuffling
+    item._shuffledCorrect = indices.indexOf(item.correct);
+    item._shuffledIndices = indices;
+
+    const list = document.getElementById('optionsList');
+    list.innerHTML = '';
+    const keys = ['A', 'B', 'C', 'D'];
+
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.innerHTML = `<span class="option__key">${keys[displayIdx]}</span><span>${item.options[origIdx]}</span>`;
+      btn.addEventListener('click', () => selectOption(displayIdx));
+      list.appendChild(btn);
+    });
+
+    document.getElementById('feedback').classList.remove('is-visible');
+    document.getElementById('nextBtn').disabled = true;
+    document.getElementById('nextBtn').textContent = state.current === questions.length - 1 ? 'See results →' : 'Next →';
+    updateProgress();
+  }
+
+  function selectOption(selectedIndex){
+    if (state.answered[state.current] !== undefined) return; // already answered
+
+    const item = questions[state.current];
+    const shuffledCorrect = item._shuffledCorrect;
+    const isCorrect = selectedIndex === shuffledCorrect;
+    state.answered[state.current] = { correct: isCorrect, selected: selectedIndex };
+    if (isCorrect) state.score++;
+
+    const optionEls = document.querySelectorAll('#optionsList .option');
+    optionEls.forEach((el, i) => {
+      el.disabled = true;
+      if (i === shuffledCorrect) el.classList.add('is-correct');
+      if (i === selectedIndex && !isCorrect) el.classList.add('is-incorrect');
+    });
+
+    const fb = document.getElementById('feedback');
+    document.getElementById('feedbackText').textContent = item.feedback;
+    fb.classList.add('is-visible');
+
+    document.getElementById('nextBtn').disabled = false;
+    updateProgress();
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (state.current < questions.length - 1){
+      state.current++;
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  });
+
+  function tierFor(score, total){
+    const pct = score / total;
+    if (pct >= 0.87) return {
+      tier: 'Signal analysis: excellent',
+      label: 'Crystal-clear signal',
+      desc: 'Almost nothing was lost in transmission. You have a strong grasp of how communication actually works inside management — encoding, channels, feedback, and why it all matters.'
+    };
+    if (pct >= 0.67) return {
+      tier: 'Signal analysis: strong',
+      label: 'Clear signal, minor noise',
+      desc: 'Most of the message came through. A quick re-read of the missed items will close the remaining gaps.'
+    };
+    if (pct >= 0.4) return {
+      tier: 'Signal analysis: mixed',
+      label: 'Some static on the line',
+      desc: 'Parts of the message got through, but there was noticeable interference. Worth revisiting the lesson section on the communication-process model and the benefits of effective communication.'
+    };
+    return {
+      tier: 'Signal analysis: weak',
+      label: 'Message lost in transmission',
+      desc: "The signal didn't come through clearly this time. Re-reading the lesson from the top — especially sender, channel, receiver, and feedback — should help before trying again."
+    };
+  }
+
+  function showResults(){
+    document.getElementById('logStatus').textContent = 'STATUS: TRANSMISSION COMPLETE';
+    const total = questions.length;
+    const result = tierFor(state.score, total);
+
+    document.getElementById('resultTier').textContent = result.tier;
+    document.getElementById('resultScore').innerHTML = `${state.score}<span>/${total}</span>`;
+    document.getElementById('resultLabel').textContent = result.label;
+    document.getElementById('resultDesc').textContent = result.desc;
+
+    const breakdown = document.getElementById('breakdown');
+    breakdown.innerHTML = '';
+    questions.forEach((item, i) => {
+      const ans = state.answered[i];
+      const row = document.createElement('div');
+      row.className = 'breakdown-row';
+      row.innerHTML = `
+        <span class="breakdown-row__icon ${ans.correct ? 'ok' : 'no'}">${ans.correct ? '✓' : '✕'}</span>
+        <span class="breakdown-row__text"><b>Q${i + 1}.</b> ${item.q}</span>
+      `;
+      breakdown.appendChild(row);
+    });
+    breakdown.style.display = 'none';
+
+    showScreen('results');
+  }
+
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    document.getElementById('logStatus').textContent = 'TOPIC: MANAGEMENT COMMUNICATION';
+    showScreen('start');
+  });
+
+  document.getElementById('reviewBtn').addEventListener('click', () => {
+    const breakdown = document.getElementById('breakdown');
+    const btn = document.getElementById('reviewBtn');
+    const isHidden = breakdown.style.display === 'none';
+    breakdown.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? 'Hide answers' : 'Review answers';
+  });
+
+})();
+</script>
+
+</body>
+</html>
